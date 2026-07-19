@@ -15,6 +15,13 @@ npm install
 npm run dev
 ```
 
+## Deploy the frontend
+
+The deployed frontend needs the URL of the deployed FastAPI backend. In your
+hosting provider's environment variables, set `VITE_API_URL` to that public
+backend URL (for example, `https://your-api.example.com`). Do not set it to
+`127.0.0.1` or `localhost`, since those point to each visitor's device.
+
 ## Run the backend
 
 ```bash
