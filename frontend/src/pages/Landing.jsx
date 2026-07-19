@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 export default function Landing() {
   return (
     <section className="relative overflow-hidden px-6 py-24">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(34,197,94,0.18),_transparent_18%),radial-gradient(circle_at_bottom_right,_rgba(16,185,129,0.12),_transparent_16%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(34,197,94,0.18),_transparent_18%),radial-gradient(circle_at_bottom_right,_rgba(16,185,129,0.12),_transparent_16%)]" />
 
       <div className="relative mx-auto max-w-7xl">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
