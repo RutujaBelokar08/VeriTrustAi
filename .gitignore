@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+venv/
+.env
+.env.*
+
+# Node
+node_modules/
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+npm-debug.log*
+
+# Build
+frontend/dist/
+backend/__pycache__/
+frontend/.vite/
+frontend/vite-env.d.ts
+
+# System
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
