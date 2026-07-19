@@ -69,7 +69,56 @@ export default function Dashboard() {
   const [stats, setStats] = useState([0, 0, 0, 0]);
   const [dragState, setDragState] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [query, setQuery] = useState('');
+  const [verificationResult, setVerificationResult] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyError, setVerifyError] = useState('');
   const [typingIndex, setTypingIndex] = useState(0);
+
+  const handleVerify = async () => {
+    setVerifyError('');
+    setVerificationResult(null);
+    const value = query.trim();
+
+    if (activeTab !== 'document' && !value) {
+      setVerifyError('Please enter a website or campaign URL.');
+      return;
+    }
+
+    if (activeTab === 'document' && !uploadedFile) {
+      setVerifyError('Please upload a document before verifying.');
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const token = localStorage.getItem('accessToken') || '';
+      const payload = activeTab === 'document'
+        ? { type: 'document', value: uploadedFile }
+        : { type: activeTab, value };
+
+      const response = await fetch('http://127.0.0.1:8000/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.detail || 'Verification request failed.');
+      }
+
+      const data = await response.json();
+      setVerificationResult(data);
+    } catch (error) {
+      setVerifyError(error.message);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   useEffect(() => {
     const targets = [3285, 92, 16, 74];
@@ -200,6 +249,8 @@ export default function Dashboard() {
                   <label className="text-sm font-medium text-slate-300">{activeContent.title}</label>
                   <input
                     type="text"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
                     placeholder={activeContent.placeholder}
                     className="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-5 py-4 text-sm text-white outline-none transition focus:border-emerald-400/40"
                   />
@@ -219,15 +270,64 @@ export default function Dashboard() {
               )}
 
               <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <button className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 px-8 py-4 text-sm font-semibold text-slate-950 transition hover:scale-[1.01]">
+                <button
+                  type="button"
+                  onClick={handleVerify}
+                  disabled={isVerifying}
+                  className={`inline-flex items-center justify-center rounded-full px-8 py-4 text-sm font-semibold text-slate-950 transition ${isVerifying ? 'cursor-not-allowed bg-slate-600/70' : 'bg-gradient-to-r from-emerald-400 to-emerald-500 hover:scale-[1.01]'}`}
+                >
                   <ShieldCheck className="mr-2 h-4 w-4" />
-                  Verify Now
+                  {isVerifying ? 'Verifying...' : 'Verify Now'}
                 </button>
                 <div className="rounded-3xl border border-white/10 bg-slate-900/70 px-5 py-4 text-sm text-slate-300 shadow-inner">
                   <p className="text-slate-400">Live analysis</p>
                   <p className="mt-2 font-medium text-white">{['Scanning...', 'Analyzing credibility...', 'Checking transparency...', 'Calling Gemini AI...', 'Generating report...'][typingIndex]}</p>
                 </div>
               </div>
+
+              {verifyError && (
+                <div className="mt-6 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">
+                  {verifyError}
+                </div>
+              )}
+
+              {verificationResult && (
+                <div className="mt-6 rounded-[1.75rem] border border-emerald-400/20 bg-slate-900/80 p-6 shadow-lg shadow-emerald-500/10">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm uppercase tracking-[0.35em] text-emerald-300/70">Verification verdict</p>
+                      <h3 className="mt-3 text-2xl font-semibold text-white">{verificationResult.score >= 75 ? 'Original website detected' : 'Potential fake or suspicious site'}</h3>
+                    </div>
+                    <div className="rounded-3xl bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-300">
+                      {verificationResult.risk.toUpperCase()}
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid gap-4 sm:grid-cols-3">
+                    <div className="rounded-3xl bg-slate-950/80 p-4">
+                      <p className="text-sm text-slate-400">Trust score</p>
+                      <p className="mt-2 text-3xl font-semibold text-white">{verificationResult.score}%</p>
+                    </div>
+                    <div className="rounded-3xl bg-slate-950/80 p-4">
+                      <p className="text-sm text-slate-400">Reviewed by</p>
+                      <p className="mt-2 text-lg font-semibold text-white">{verificationResult.verified_by}</p>
+                    </div>
+                    <div className="rounded-3xl bg-slate-950/80 p-4">
+                      <p className="text-sm text-slate-400">Evidence</p>
+                      <p className="mt-2 text-lg font-semibold text-white">{verificationResult.details.length} checks passed</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 space-y-3 text-sm text-slate-300">
+                    <p>{verificationResult.summary}</p>
+                    <ul className="list-inside list-disc space-y-2 pl-4">
+                      {verificationResult.details.map((detail, index) => (
+                        <li key={index}>{detail}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
 
