@@ -15,8 +15,10 @@ export default function App() {
   const [role, setRole] = useState(localStorage.getItem('userRole') || '');
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    document.documentElement.classList.toggle('light', theme === 'light');
+    const root = document.documentElement;
+    root.classList.toggle('dark', theme === 'dark');
+    root.classList.toggle('light', theme === 'light');
+    root.style.colorScheme = theme;
   }, [theme]);
 
   const handleLogin = (accessToken, userRole) => {
@@ -34,9 +36,12 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden transition-colors duration-700">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(34,197,94,0.14),_transparent_20%),radial-gradient(circle_at_bottom_right,_rgba(16,185,129,0.16),_transparent_25%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.06),_transparent_35%)]" />
+    <div className={`relative min-h-screen overflow-x-hidden transition-colors duration-700 ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className={`absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.16),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(124,58,237,0.16),_transparent_20%),radial-gradient(circle_at_bottom_right,_rgba(34,197,94,0.16),_transparent_28%)] ${theme === 'dark' ? 'opacity-100' : 'opacity-80'}`} />
+        <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-[linear-gradient(135deg,rgba(255,255,255,0.04)_0%,transparent_100%)]' : 'bg-[linear-gradient(135deg,rgba(15,23,42,0.03)_0%,transparent_100%)]'}`} />
+      </div>
+
       <Navbar theme={theme} onToggle={() => setTheme(theme === 'dark' ? 'light' : 'dark')} isAuthenticated={Boolean(token)} onLogout={handleLogout} role={role} />
 
       <main className="relative z-10">

@@ -10,38 +10,38 @@ const navLinks = [
 
 export default function Navbar({ theme, onToggle, isAuthenticated, onLogout, role }) {
   const navigate = useNavigate();
-
   const signInLabel = role === 'admin' ? 'Admin Console' : role === 'user' ? 'User Portal' : 'Sign In';
+  const isDark = theme === 'dark';
 
   return (
-    <header className="sticky top-0 z-20 border-b border-white/10 bg-slate-950/40 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-        <Link to={isAuthenticated ? '/dashboard' : '/'} className="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white shadow-glow transition hover:border-emerald-400/40 hover:bg-white/10">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-500/20">
+    <header className={`sticky top-0 z-20 border-b backdrop-blur-2xl ${isDark ? 'border-white/10 bg-slate-950/70' : 'border-slate-200/80 bg-white/70'}`}>
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <Link to={isAuthenticated ? '/dashboard' : '/'} className={`flex items-center gap-3 rounded-2xl border px-3 py-2.5 transition ${isDark ? 'border-white/10 bg-white/5 hover:border-blue-400/40 hover:bg-white/10' : 'border-slate-200 bg-white/80 hover:border-blue-400/40 hover:bg-slate-50'}`}>
+          <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${isDark ? 'bg-blue-500/10 text-blue-300' : 'bg-blue-600/10 text-blue-600'}`}>
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-sm font-semibold tracking-tight text-emerald-300">VeriTrust AI</p>
-            <p className="text-xs text-slate-300">AI Trust Platform</p>
+            <p className={`text-sm font-semibold tracking-tight ${isDark ? 'text-blue-300' : 'text-blue-600'}`}>VeriTrust AI</p>
+            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>AI Trust Platform</p>
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-3 text-sm text-slate-300 md:flex">
+        <nav className={`hidden items-center gap-2 rounded-full border px-2 py-2 text-sm md:flex ${isDark ? 'border-white/10 bg-white/5 text-slate-300' : 'border-slate-200 bg-white/80 text-slate-600'}`}>
           {navLinks.map((link) => (
-            <Link key={link.label} to={link.to} className="rounded-2xl px-4 py-2 transition hover:bg-white/10 hover:text-white">
+            <Link key={link.label} to={link.to} className={`rounded-full px-3 py-2 transition ${isDark ? 'hover:bg-white/10 hover:text-white' : 'hover:bg-slate-100 hover:text-slate-900'}`}>
               {link.label}
             </Link>
           ))}
-          <Link to="/settings" className="rounded-2xl px-4 py-2 transition hover:bg-white/10 hover:text-white">
-            Settings
-          </Link>
         </nav>
 
         <div className="flex items-center gap-3">
-          <div className="hidden items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-2 text-slate-300 shadow-glow md:flex">
-            <LayoutDashboard className="h-4 w-4 text-emerald-300" />
+          <div className={`hidden items-center gap-2 rounded-full border px-3 py-2 text-sm md:flex ${isDark ? 'border-white/10 bg-white/5 text-slate-300' : 'border-slate-200 bg-white/80 text-slate-600'}`}>
+            <LayoutDashboard className={`h-4 w-4 ${isDark ? 'text-blue-300' : 'text-blue-600'}`} />
             <span>System Health</span>
           </div>
+          <button type="button" className={`hidden rounded-full p-2.5 transition md:inline-flex ${isDark ? 'bg-white/5 text-slate-200 hover:bg-white/10' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+            <Bell className="h-4 w-4" />
+          </button>
           <ThemeToggle theme={theme} onToggle={onToggle} />
           {isAuthenticated ? (
             <button
@@ -50,13 +50,13 @@ export default function Navbar({ theme, onToggle, isAuthenticated, onLogout, rol
                 onLogout();
                 navigate('/login');
               }}
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10"
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm transition ${isDark ? 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10' : 'border-slate-200 bg-white/80 text-slate-700 hover:bg-slate-100'}`}
             >
               <LogOut className="h-4 w-4" />
               Sign Out
             </button>
           ) : (
-            <Link to="/login" className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/10">
+            <Link to="/login" className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm transition ${isDark ? 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10' : 'border-slate-200 bg-white/80 text-slate-700 hover:bg-slate-100'}`}>
               <UserCircle2 className="h-4 w-4" />
               {signInLabel}
             </Link>

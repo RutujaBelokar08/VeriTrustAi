@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  ArrowRight,
   BarChart3,
   BookOpen,
   CheckCircle2,
+  Compass,
+  FileCheck2,
   Globe2,
   ShieldCheck,
   Sparkles,
   TrendingUp,
   UploadCloud,
+  Zap,
 } from 'lucide-react';
 import {
   CartesianGrid,
@@ -64,10 +66,16 @@ const scamAlerts = [
   { title: 'Impersonated NGO tax documents', category: 'Identity mismatch' },
 ];
 
+const statCards = [
+  { label: 'Verifications', value: '3.2k', icon: Sparkles, accent: 'from-blue-500 to-cyan-500' },
+  { label: 'Avg trust', value: '92%', icon: ShieldCheck, accent: 'from-emerald-500 to-green-500' },
+  { label: 'Alerts', value: '16', icon: Zap, accent: 'from-violet-500 to-fuchsia-500' },
+  { label: 'Reports', value: '74', icon: FileCheck2, accent: 'from-amber-500 to-orange-500' },
+];
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('website');
   const [stats, setStats] = useState([0, 0, 0, 0]);
-  const [dragState, setDragState] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [query, setQuery] = useState('');
   const [verificationResult, setVerificationResult] = useState(null);
@@ -92,17 +100,13 @@ export default function Dashboard() {
 
     setIsVerifying(true);
     try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
       const token = localStorage.getItem('accessToken') || '';
-      const payload = activeTab === 'document'
-        ? { type: 'document', value: uploadedFile }
-        : { type: activeTab, value };
+      const payload = activeTab === 'document' ? { type: 'document', value: uploadedFile } : { type: activeTab, value };
 
-      const response = await fetch('http://127.0.0.1:8000/verify', {
+      const response = await fetch(`${apiUrl}/verify`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
 
@@ -133,227 +137,203 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    const lines = ['Scanning...', 'Analyzing credibility...', 'Checking transparency...', 'Calling Gemini AI...', 'Generate report...'];
+    const lines = ['Checking government records...', 'Scanning website...', 'Analyzing documents...', 'Running AI credibility analysis...', 'Cross-checking sources...', 'Generating trust report...'];
     const interval = setInterval(() => {
       setTypingIndex((current) => (current + 1) % lines.length);
-    }, 2100);
+    }, 2200);
     return () => clearInterval(interval);
   }, []);
 
   const activeContent = useMemo(() => {
-    if (activeTab === 'website') {
-      return {
-        title: 'Paste NGO Website',
-        placeholder: 'https://example-ngo.org',
-      };
-    }
-    if (activeTab === 'campaign') {
-      return {
-        title: 'Paste campaign URL',
-        placeholder: 'https://donate.example.org/campaign',
-      };
-    }
-    return {
-      title: 'Drop document or upload file',
-      placeholder: '',
-    };
+    if (activeTab === 'website') return { title: 'Paste NGO URL', placeholder: 'https://example-ngo.org' };
+    if (activeTab === 'campaign') return { title: 'Paste campaign URL', placeholder: 'https://donate.example.org/campaign' };
+    return { title: 'Drop document or upload file', placeholder: '' };
   }, [activeTab]);
 
   const filteredVerifications = useMemo(() => recentVerifications.slice(0, 3), []);
 
   return (
-    <section className="relative mx-auto max-w-7xl px-6 py-16">
-      <div className="absolute left-0 top-0 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
-      <div className="absolute right-0 top-24 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
-      <div className="relative z-10 space-y-10">
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }} className="rounded-[2rem] border border-white/10 bg-slate-950/80 p-10 shadow-glow backdrop-blur-xl">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-xs uppercase tracking-[0.4em] text-emerald-300/80">AI Trust Command Center</p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-                Modern AI-powered cybersecurity trust platform for NGO verification.
+    <section className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+      <div className="relative z-10 space-y-8">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/80 p-6 shadow-[0_24px_120px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70">
+          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-600 dark:text-blue-300">AI Trust Command Center</p>
+              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-4xl lg:text-5xl">
+                Premium verification workflows for modern donor teams.
               </h1>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
-                Monitor donations, verify organizations, and uncover suspicious campaigns with a premium Glassmorphism dashboard experience.
+              <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-300">
+                Review trust signals, inspect evidence, and lead with confidence using a polished AI-native experience.
               </p>
             </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:w-[420px]">
-              <div className="rounded-[1.75rem] border border-white/10 bg-slate-900/70 p-5 shadow-lg shadow-black/20">
-                <p className="text-sm uppercase tracking-[0.35em] text-slate-500">Weekly health</p>
-                <p className="mt-4 text-3xl font-semibold text-white">Secure</p>
-                <p className="mt-2 text-sm text-slate-400">System uptime and verification throughput are stable.</p>
+            <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-5 dark:border-white/10 dark:bg-slate-950/70">
+              <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                System health: stable and secure
               </div>
-              <div className="rounded-[1.75rem] border border-white/10 bg-slate-900/70 p-5 shadow-lg shadow-black/20">
-                <p className="text-sm uppercase tracking-[0.35em] text-slate-500">Trust signal</p>
-                <p className="mt-4 text-3xl font-semibold text-emerald-300">+92%</p>
-                <p className="mt-2 text-sm text-slate-400">Trusted verifications across active campaigns.</p>
-              </div>
+              <div className="mt-4 text-3xl font-semibold text-slate-900 dark:text-white">+92% trust</div>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Trusted verifications across active campaigns.</p>
             </div>
           </div>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {[
-              { label: 'Total Verifications', value: stats[0], icon: Sparkles },
-              { label: 'Average Trust Score', value: `${stats[1]}%`, icon: ShieldCheck },
-              { label: 'Fraud Detected', value: stats[2], icon: BookOpen },
-              { label: 'Saved Reports', value: stats[3], icon: BarChart3 },
-            ].map((item) => (
-              <motion.div key={item.label} whileHover={{ y: -4 }} className="rounded-[1.75rem] border border-white/10 bg-slate-900/70 p-6 shadow-xl shadow-black/20 transition">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-3xl font-semibold text-white">{item.value}</p>
-                    <p className="mt-2 text-sm text-slate-400">{item.label}</p>
-                  </div>
-                  <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-emerald-500/10 text-emerald-300">
-                    <item.icon className="h-6 w-6" />
-                  </div>
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {statCards.map((item, index) => (
+              <motion.div key={item.label} whileHover={{ y: -4 }} className="rounded-[1.5rem] border border-slate-200 bg-white/90 p-5 shadow-sm transition dark:border-white/10 dark:bg-slate-950/70">
+                <div className={`inline-flex rounded-2xl bg-gradient-to-r ${item.accent} p-2.5 text-white`}>
+                  <item.icon className="h-5 w-5" />
                 </div>
+                <p className="mt-5 text-2xl font-semibold text-slate-900 dark:text-white">{index === 0 ? stats[0] : index === 1 ? `${stats[1]}%` : index === 2 ? stats[2] : stats[3]}</p>
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{item.label}</p>
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        <div className="grid gap-8 xl:grid-cols-[1.4fr_0.85fr]">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.1 }} className="rounded-[2rem] border border-white/10 bg-slate-950/80 p-8 shadow-glow backdrop-blur-xl">
-            <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+        <div className="grid gap-8 xl:grid-cols-[1.25fr_0.75fr]">
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.05 }} className="rounded-[2rem] border border-slate-200/80 bg-white/80 p-6 shadow-[0_24px_120px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <p className="text-sm uppercase tracking-[0.35em] text-emerald-400/70">Verification</p>
-                <h2 className="mt-3 text-3xl font-semibold text-white">Verify charities, campaigns or documents</h2>
-                <p className="mt-3 text-sm text-slate-400">Use advanced AI analysis to inspect NGO legitimacy and safeguard donation flows.</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-600 dark:text-blue-300">Verification Flow</p>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Inspect charities, campaigns and documents with AI guidance.</h2>
               </div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200">
-                <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 dark:border-white/10 dark:bg-slate-950/70 dark:text-slate-300">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                 Trusted by leading nonprofits
               </div>
             </div>
 
-            <div className="mt-8 overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-1">
-              <div className="grid grid-cols-3 gap-1 bg-slate-950/80 px-2 py-2 sm:grid-cols-3">
+            <div className="mt-8 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-1 dark:border-white/10 dark:bg-slate-950/70">
+              <div className="grid grid-cols-3 gap-1 rounded-[1.2rem] bg-white/80 p-1 dark:bg-slate-900/80">
                 {['website', 'campaign', 'document'].map((tab) => (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => setActiveTab(tab)}
-                    className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${activeTab === tab ? 'bg-emerald-400/15 text-emerald-200' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
-                  >
-                    {tab === 'website' ? 'Website' : tab === 'campaign' ? 'Campaign' : 'Document Upload'}
+                  <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={`rounded-[1rem] px-4 py-3 text-sm font-medium transition ${activeTab === tab ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}`}>
+                    {tab === 'website' ? 'Website' : tab === 'campaign' ? 'Campaign' : 'Document'}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="mt-8 rounded-[1.75rem] border border-white/10 bg-slate-950/90 p-6">
+            <div className="mt-8 rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-6 dark:border-white/10 dark:bg-slate-950/70">
               {activeTab !== 'document' ? (
                 <div className="space-y-4">
-                  <label className="text-sm font-medium text-slate-300">{activeContent.title}</label>
-                  <input
-                    type="text"
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    placeholder={activeContent.placeholder}
-                    className="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-5 py-4 text-sm text-white outline-none transition focus:border-emerald-400/40"
-                  />
-                  <p className="text-sm text-slate-500">Smart AI parsing automatically extracts organization metadata and campaign credibility signals.</p>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{activeContent.title}</label>
+                  <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={activeContent.placeholder} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 dark:border-white/10 dark:bg-slate-900 dark:text-white" />
+                  <p className="text-sm text-slate-500 dark:text-slate-400">AI parses web metadata, registration signals, and credibility context instantly.</p>
                 </div>
               ) : (
-                <div className="rounded-[1.75rem] border border-dashed border-emerald-400/30 bg-emerald-500/10 p-10 text-center transition duration-300 hover:border-emerald-300/60 hover:bg-emerald-500/15">
-                  <UploadCloud className="mx-auto h-12 w-12 text-emerald-300" />
-                  <p className="mt-6 text-lg font-semibold text-white">Drag & drop upload</p>
-                  <p className="mt-2 text-sm text-slate-400">Supported formats: PDF, JPG, PNG</p>
-                  <label className="mt-6 inline-flex cursor-pointer rounded-full bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+                <div className="rounded-[1.5rem] border border-dashed border-blue-400/30 bg-blue-500/10 p-8 text-center">
+                  <UploadCloud className="mx-auto h-10 w-10 text-blue-600 dark:text-blue-300" />
+                  <p className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">Upload supporting documents</p>
+                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">PDF, PNG, or JPG files supported.</p>
+                  <label className="mt-6 inline-flex cursor-pointer rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-200">
                     Select file
                     <input type="file" className="hidden" onChange={(event) => setUploadedFile(event.target.files?.[0]?.name || null)} />
                   </label>
-                  {uploadedFile && <p className="mt-4 text-sm text-emerald-300">Uploaded: {uploadedFile}</p>}
+                  {uploadedFile && <p className="mt-4 text-sm text-blue-600 dark:text-blue-300">Uploaded: {uploadedFile}</p>}
                 </div>
               )}
 
               <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <button
-                  type="button"
-                  onClick={handleVerify}
-                  disabled={isVerifying}
-                  className={`inline-flex items-center justify-center rounded-full px-8 py-4 text-sm font-semibold text-slate-950 transition ${isVerifying ? 'cursor-not-allowed bg-slate-600/70' : 'bg-gradient-to-r from-emerald-400 to-emerald-500 hover:scale-[1.01]'}`}
-                >
+                <button type="button" onClick={handleVerify} disabled={isVerifying} className={`inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition ${isVerifying ? 'cursor-not-allowed bg-slate-400 text-white' : 'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-[0_20px_60px_rgba(37,99,235,0.25)] hover:scale-[1.01]'}`}>
                   <ShieldCheck className="mr-2 h-4 w-4" />
                   {isVerifying ? 'Verifying...' : 'Verify Now'}
                 </button>
-                <div className="rounded-3xl border border-white/10 bg-slate-900/70 px-5 py-4 text-sm text-slate-300 shadow-inner">
-                  <p className="text-slate-400">Live analysis</p>
-                  <p className="mt-2 font-medium text-white">{['Scanning...', 'Analyzing credibility...', 'Checking transparency...', 'Calling Gemini AI...', 'Generating report...'][typingIndex]}</p>
+                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Live analysis</p>
+                  <p className="mt-1 font-medium text-slate-900 dark:text-white">{['Checking government records...', 'Scanning website...', 'Analyzing documents...', 'Running AI credibility analysis...', 'Cross-checking sources...', 'Generating trust report...'][typingIndex]}</p>
                 </div>
               </div>
 
-              {verifyError && (
-                <div className="mt-6 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">
-                  {verifyError}
-                </div>
-              )}
+              {verifyError && <div className="mt-6 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-600 dark:text-rose-400">{verifyError}</div>}
 
               {verificationResult && (
-                <div className="mt-6 rounded-[1.75rem] border border-emerald-400/20 bg-slate-900/80 p-6 shadow-lg shadow-emerald-500/10">
+                <div className={`mt-6 rounded-[1.5rem] border p-6 shadow-sm ${verificationResult.status === 'verified' ? 'border-emerald-500/20 bg-white dark:border-emerald-400/20 dark:bg-slate-900/80' : verificationResult.status === 'invalid' || verificationResult.status === 'unreachable' ? 'border-amber-500/20 bg-amber-500/10 dark:border-amber-400/20' : 'border-rose-500/20 bg-rose-500/10 dark:border-rose-400/20'}`}>
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-sm uppercase tracking-[0.35em] text-emerald-300/70">Verification verdict</p>
-                      <h3 className="mt-3 text-2xl font-semibold text-white">{verificationResult.score >= 75 ? 'Original website detected' : 'Potential fake or suspicious site'}</h3>
+                      <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Verification verdict</p>
+                      <h3 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{verificationResult.title}</h3>
                     </div>
-                    <div className="rounded-3xl bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-300">
-                      {verificationResult.risk.toUpperCase()}
+                    {verificationResult.score !== null && (
+                      <div className="rounded-full bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-600 dark:text-emerald-300">Score {verificationResult.score}/100</div>
+                    )}
+                  </div>
+
+                  <div className="mt-5 grid gap-4 md:grid-cols-3">
+                    <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/70">
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Trust score</p>
+                      <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{verificationResult.score ?? 'N/A'}</p>
+                    </div>
+                    <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/70">
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Confidence</p>
+                      <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">{verificationResult.confidence}</p>
+                    </div>
+                    <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/70">
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Reviewed by</p>
+                      <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">{verificationResult.verified_by}</p>
                     </div>
                   </div>
 
-                  <div className="mt-5 grid gap-4 sm:grid-cols-3">
-                    <div className="rounded-3xl bg-slate-950/80 p-4">
-                      <p className="text-sm text-slate-400">Trust score</p>
-                      <p className="mt-2 text-3xl font-semibold text-white">{verificationResult.score}%</p>
-                    </div>
-                    <div className="rounded-3xl bg-slate-950/80 p-4">
-                      <p className="text-sm text-slate-400">Reviewed by</p>
-                      <p className="mt-2 text-lg font-semibold text-white">{verificationResult.verified_by}</p>
-                    </div>
-                    <div className="rounded-3xl bg-slate-950/80 p-4">
-                      <p className="text-sm text-slate-400">Evidence</p>
-                      <p className="mt-2 text-lg font-semibold text-white">{verificationResult.details.length} checks passed</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 space-y-3 text-sm text-slate-300">
+                  <div className="mt-5 space-y-3 text-sm text-slate-600 dark:text-slate-300">
                     <p>{verificationResult.summary}</p>
-                    <ul className="list-inside list-disc space-y-2 pl-4">
-                      {verificationResult.details.map((detail, index) => (
-                        <li key={index}>{detail}</li>
-                      ))}
-                    </ul>
+                    {verificationResult.reason && verificationResult.reason.length > 0 && (
+                      <div>
+                        <p className="font-semibold text-slate-900 dark:text-white">Reason:</p>
+                        <ul className="mt-2 list-inside list-disc space-y-2 pl-2">
+                          {verificationResult.reason.map((item) => <li key={item}>{item}</li>)}
+                        </ul>
+                      </div>
+                    )}
                   </div>
+
+                  {verificationResult.status === 'verified' && (
+                    <div className="mt-6 grid gap-5 lg:grid-cols-3">
+                      <div className="rounded-[1.25rem] border border-emerald-500/20 bg-emerald-500/10 p-4">
+                        <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Positive Signals</p>
+                        <ul className="mt-3 space-y-2 text-sm text-slate-700 dark:text-slate-200">
+                          {verificationResult.positive_signals.map((item) => <li key={item}>• {item}</li>)}
+                        </ul>
+                      </div>
+                      <div className="rounded-[1.25rem] border border-amber-500/20 bg-amber-500/10 p-4">
+                        <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">Warnings</p>
+                        <ul className="mt-3 space-y-2 text-sm text-slate-700 dark:text-slate-200">
+                          {verificationResult.warnings.map((item) => <li key={item}>• {item}</li>)}
+                        </ul>
+                      </div>
+                      <div className="rounded-[1.25rem] border border-slate-300 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-slate-950/70">
+                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Missing Information</p>
+                        <ul className="mt-3 space-y-2 text-sm text-slate-700 dark:text-slate-200">
+                          {verificationResult.missing_information.map((item) => <li key={item}>• {item}</li>)}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </motion.div>
 
-          <motion.aside initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.15 }} className="space-y-6">
-            <div className="rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-glow backdrop-blur-xl">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.35em] text-emerald-400/80">AI Assistant</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-white">Trust Advisor</h2>
-                </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-emerald-500/10 text-emerald-300">
+          <motion.aside initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.1 }} className="space-y-6">
+            <div className="rounded-[2rem] border border-slate-200/80 bg-white/80 p-6 shadow-[0_24px_120px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70">
+              <div className="flex items-center gap-3">
+                <div className="rounded-2xl bg-blue-500/10 p-3 text-blue-600 dark:text-blue-300">
                   <BookOpen className="h-5 w-5" />
                 </div>
-              </div>
-              <div className="mt-6 space-y-4 text-sm text-slate-300">
-                <div className="rounded-3xl bg-slate-900/70 p-4">
-                  <p className="font-semibold text-white">Today's tip</p>
-                  <p className="mt-2 text-slate-400">Check website registration and charity certification before trusting fundraising campaigns.</p>
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-600 dark:text-blue-300">AI Assistant</p>
+                  <h2 className="mt-1 text-xl font-semibold text-slate-900 dark:text-white">Trust advisor</h2>
                 </div>
-                <div className="rounded-3xl bg-slate-900/70 p-4">
-                  <p className="font-semibold text-white">Recent scams</p>
-                  <ul className="mt-3 space-y-2 text-slate-400">
+              </div>
+              <div className="mt-6 space-y-4">
+                <div className="rounded-[1.25rem] bg-slate-50 p-4 dark:bg-slate-950/70">
+                  <p className="font-semibold text-slate-900 dark:text-white">Today's tip</p>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Cross-check registration, website activity, and financial transparency before any donation decision.</p>
+                </div>
+                <div className="rounded-[1.25rem] bg-slate-50 p-4 dark:bg-slate-950/70">
+                  <p className="font-semibold text-slate-900 dark:text-white">Recent scam alerts</p>
+                  <ul className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-400">
                     {scamAlerts.map((item) => (
-                      <li key={item.title} className="rounded-2xl bg-white/5 p-3">
-                        <p className="font-medium text-white">{item.title}</p>
-                        <p className="text-xs text-slate-500">{item.category}</p>
+                      <li key={item.title} className="rounded-2xl border border-slate-200 bg-white p-3 dark:border-white/10 dark:bg-slate-900/70">
+                        <p className="font-medium text-slate-900 dark:text-white">{item.title}</p>
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.category}</p>
                       </li>
                     ))}
                   </ul>
@@ -361,41 +341,37 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-glow backdrop-blur-xl">
-              <div className="flex items-center gap-3 text-slate-300">
-                <div className="rounded-3xl bg-emerald-500/10 p-3 text-emerald-300">
+            <div className="rounded-[2rem] border border-slate-200/80 bg-white/80 p-6 shadow-[0_24px_120px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70">
+              <div className="flex items-center gap-3">
+                <div className="rounded-2xl bg-emerald-500/10 p-3 text-emerald-600 dark:text-emerald-300">
                   <TrendingUp className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="font-semibold text-white">Trust indicators</p>
-                  <p className="text-sm text-slate-400">Real-time risk scoring, NGO validation, and campaign history.</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-600 dark:text-blue-300">Trust indicators</p>
+                  <h2 className="mt-1 text-xl font-semibold text-slate-900 dark:text-white">Signals that matter</h2>
                 </div>
               </div>
-              <div className="mt-6 grid gap-4">
-                {['Verified by VeriTrust AI', 'Global NGO coverage', '24/7 system health'].map((tag) => (
-                  <span key={tag} className="inline-flex rounded-full bg-white/5 px-4 py-2 text-sm text-slate-300">{tag}</span>
-                ))}
+              <div className="mt-5 flex flex-wrap gap-2">
+                {['Verified by VeriTrust AI', 'Global NGO coverage', '24/7 system health'].map((tag) => <span key={tag} className="rounded-full bg-slate-50 px-3 py-2 text-sm text-slate-600 dark:bg-slate-950/70 dark:text-slate-300">{tag}</span>)}
               </div>
             </div>
           </motion.aside>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.2 }} className="rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-glow backdrop-blur-xl">
+        <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.15 }} className="rounded-[2rem] border border-slate-200/80 bg-white/80 p-6 shadow-[0_24px_120px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.35em] text-emerald-400/80">Trust breakdown</p>
-                <h2 className="mt-3 text-2xl font-semibold text-white">Verified network insights</h2>
+                <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-600 dark:text-blue-300">Trust breakdown</p>
+                <h2 className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">Verified network insights</h2>
               </div>
-              <div className="rounded-3xl bg-slate-900/70 px-4 py-2 text-sm text-slate-300">Updated 3 min ago</div>
+              <div className="rounded-full bg-slate-50 px-3 py-2 text-sm text-slate-600 dark:bg-slate-950/70 dark:text-slate-300">Updated 3 min ago</div>
             </div>
             <div className="mt-6 h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={trustBreakdown} dataKey="value" nameKey="name" innerRadius={52} outerRadius={90} paddingAngle={4}>
-                    {trustBreakdown.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={['#22c55e', '#10b981', '#38bdf8', '#f59e0b'][index % 4]} />
-                    ))}
+                  <Pie data={trustBreakdown} dataKey="value" innerRadius={54} outerRadius={92} paddingAngle={4}>
+                    {trustBreakdown.map((entry, index) => <Cell key={`cell-${index}`} fill={['#22c55e', '#10b981', '#38bdf8', '#f59e0b'][index % 4]} />)}
                   </Pie>
                   <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.08)' }} />
                 </PieChart>
@@ -403,10 +379,10 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.25 }} className="rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-glow backdrop-blur-xl">
-            <p className="text-sm uppercase tracking-[0.35em] text-emerald-400/80">Risk distribution</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">Campaign integrity radar</h2>
-            <div className="mt-8 h-80">
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.2 }} className="rounded-[2rem] border border-slate-200/80 bg-white/80 p-6 shadow-[0_24px_120px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70">
+            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-600 dark:text-blue-300">Risk distribution</p>
+            <h2 className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">Campaign integrity radar</h2>
+            <div className="mt-6 h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={riskRadar} outerRadius="80%">
                   <PolarGrid stroke="rgba(148,163,184,0.2)" />
@@ -420,14 +396,14 @@ export default function Dashboard() {
           </motion.div>
         </div>
 
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.3 }} className="grid gap-6 xl:grid-cols-[1fr_0.65fr]">
-          <div className="rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-glow backdrop-blur-xl">
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.25 }} className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-[2rem] border border-slate-200/80 bg-white/80 p-6 shadow-[0_24px_120px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.35em] text-emerald-400/80">Credibility timeline</p>
-                <h2 className="mt-3 text-2xl font-semibold text-white">Trust trend</h2>
+                <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-600 dark:text-blue-300">Credibility timeline</p>
+                <h2 className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">Trust trend</h2>
               </div>
-              <div className="rounded-3xl bg-slate-900/70 px-4 py-2 text-sm text-slate-300">+4 pts since last month</div>
+              <div className="rounded-full bg-slate-50 px-3 py-2 text-sm text-slate-600 dark:bg-slate-950/70 dark:text-slate-300">+4 pts since last month</div>
             </div>
             <div className="mt-6 h-72">
               <ResponsiveContainer width="100%" height="100%">
@@ -443,25 +419,25 @@ export default function Dashboard() {
           </div>
 
           <div className="space-y-6">
-            <div className="rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-glow backdrop-blur-xl">
+            <div className="rounded-[2rem] border border-slate-200/80 bg-white/80 p-6 shadow-[0_24px_120px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.35em] text-emerald-400/80">Recent verifications</p>
-                  <h2 className="mt-3 text-2xl font-semibold text-white">Recent campaigns</h2>
+                  <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-600 dark:text-blue-300">Recent verifications</p>
+                  <h2 className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">Recent campaigns</h2>
                 </div>
-                <div className="rounded-3xl bg-slate-900/70 px-4 py-2 text-sm text-slate-300">Live feed</div>
+                <div className="rounded-full bg-slate-50 px-3 py-2 text-sm text-slate-600 dark:bg-slate-950/70 dark:text-slate-300">Live feed</div>
               </div>
               <div className="mt-6 space-y-3">
                 {filteredVerifications.map((item) => (
-                  <div key={item.name} className="rounded-3xl border border-white/10 bg-slate-900/70 p-4 transition hover:bg-white/5">
+                  <div key={item.name} className="rounded-[1.25rem] border border-slate-200 bg-slate-50/80 p-4 transition hover:bg-white dark:border-white/10 dark:bg-slate-950/70">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="font-semibold text-white">{item.name}</p>
-                        <p className="mt-1 text-sm text-slate-400">{item.date}</p>
+                        <p className="font-semibold text-slate-900 dark:text-white">{item.name}</p>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{item.date}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xl font-semibold text-emerald-300">{item.score}</p>
-                        <p className="text-sm text-slate-400">{item.status}</p>
+                        <p className="text-lg font-semibold text-emerald-600 dark:text-emerald-300">{item.score}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{item.status}</p>
                       </div>
                     </div>
                   </div>
@@ -469,13 +445,13 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-glow backdrop-blur-xl">
-              <p className="text-sm uppercase tracking-[0.35em] text-emerald-400/80">Latest scam alerts</p>
+            <div className="rounded-[2rem] border border-slate-200/80 bg-white/80 p-6 shadow-[0_24px_120px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70">
+              <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-600 dark:text-blue-300">Latest scam alerts</p>
               <div className="mt-5 space-y-3">
                 {scamAlerts.map((item) => (
-                  <div key={item.title} className="rounded-3xl border border-white/10 bg-slate-900/70 p-4 transition hover:bg-white/5">
-                    <p className="font-semibold text-white">{item.title}</p>
-                    <p className="mt-1 text-sm text-slate-400">{item.category}</p>
+                  <div key={item.title} className="rounded-[1.25rem] border border-slate-200 bg-slate-50/80 p-4 transition hover:bg-white dark:border-white/10 dark:bg-slate-950/70">
+                    <p className="font-semibold text-slate-900 dark:text-white">{item.title}</p>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{item.category}</p>
                   </div>
                 ))}
               </div>
